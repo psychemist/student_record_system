@@ -8,75 +8,7 @@
 
 #define INITIAL_CAPACITY 10
 
-/* ------------------ STUDENT RECORD SYSTEM CORE FUNCTIONS ------------------ */
-
-/**
- * init_system - initialize student record system
- *
- * @sys: pointer to variable holding student record system
- * Return: void
- */
-void init_system(StudentSystem *sys)
-{
-    // assign default variables to student record system
-    sys->count = 0;
-    sys->capacity = INITIAL_CAPACITY;
-
-    // dynamically allocate array in memory for student records
-    sys->students = (Student *)malloc(sys->capacity * sizeof(Student));
-
-    // exit early if record system uninitialized properly
-    if (sys->students == NULL)
-    {
-        printf("Memory allocation failed!\n");
-        exit(1);
-    }
-}
-
-/**
- * free_system - free dynamically allocated memory before exiting program
- *
- * @sys: pointer to student record system variable
- * Return: void
- */
-void free_system(StudentSystem *sys)
-{
-    // free dynamically allocated [heap] memory
-    if (sys->students != NULL)
-    {
-        free(sys->students);
-        sys->students = NULL;
-    }
-
-    // reset variables in [stack] memory
-    sys->count = 0;
-    sys->capacity = 0;
-}
-
-/**
- * resize_system - increase system capacity to accomodate more students
- *
- * @sys: pointer to student record system variable
- * Return: void
- */
-void resize_system(StudentSystem *sys)
-{
-    // double student record system size if count exceeds current capacity
-    if (sys->count >= sys->capacity)
-    {
-        sys->capacity *= 2;
-
-        // reallocate more memory to dynamic array of student records
-        sys->students = (Student *)realloc(sys->students, sys->capacity * sizeof(Student));
-
-        // exit when a null pointer (empty system) is passed for reallocation
-        if (sys->students == NULL)
-        {
-            printf("Memory reallocation failed!\n");
-            exit(1);
-        }
-    }
-}
+/* ------------------ STUDENT RECORD SYSTEM STARTER FUNCTIONS ------------------ */
 
 /**
  * greet_user - prompt user for name and print welcome message to stdout
@@ -159,6 +91,76 @@ int get_menu_choice()
 
         // return valid choice int to main function
         return choice;
+    }
+}
+
+/* ------------------ STUDENT RECORD SYSTEM MEMORY MANAGEMENT ------------------ */
+
+/**
+ * init_system - initialize student record system
+ *
+ * @sys: pointer to variable holding student record system
+ * Return: void
+ */
+void init_system(StudentSystem *sys)
+{
+    // assign default variables to student record system
+    sys->count = 0;
+    sys->capacity = INITIAL_CAPACITY;
+
+    // dynamically allocate array in memory for student records
+    sys->students = (Student *)malloc(sys->capacity * sizeof(Student));
+
+    // exit early if record system uninitialized properly
+    if (sys->students == NULL)
+    {
+        printf("Memory allocation failed!\n");
+        exit(1);
+    }
+}
+
+/**
+ * free_system - free dynamically allocated memory before exiting program
+ *
+ * @sys: pointer to student record system variable
+ * Return: void
+ */
+void free_system(StudentSystem *sys)
+{
+    // free dynamically allocated [heap] memory
+    if (sys->students != NULL)
+    {
+        free(sys->students);
+        sys->students = NULL;
+    }
+
+    // reset variables in [stack] memory
+    sys->count = 0;
+    sys->capacity = 0;
+}
+
+/**
+ * resize_system - increase system capacity to accomodate more students
+ *
+ * @sys: pointer to student record system variable
+ * Return: void
+ */
+void resize_system(StudentSystem *sys)
+{
+    // double student record system size if count exceeds current capacity
+    if (sys->count >= sys->capacity)
+    {
+        sys->capacity *= 2;
+
+        // reallocate more memory to dynamic array of student records
+        sys->students = (Student *)realloc(sys->students, sys->capacity * sizeof(Student));
+
+        // exit when a null pointer (empty system) is passed for reallocation
+        if (sys->students == NULL)
+        {
+            printf("Memory reallocation failed!\n");
+            exit(1);
+        }
     }
 }
 
@@ -427,4 +429,153 @@ static int find_student_index(const StudentSystem *sys, int roll)
 
     // return -1 if no matching student found
     return -1;
+}
+
+/* ------------------ STUDENT RECORD SYSTEM CORE FEATURES ------------------ */
+
+/**
+ * add_student - add new student to record system
+ *
+ * @sys: pointer to student record system variable
+ * Return: void
+ */
+void add_student(StudentSystem *sys)
+{
+    // increase system capacity if student records array is full
+    resize_system(sys);
+
+    // declare new student array
+    Student student;
+
+    // read name into student struct using helper function
+    read_name("Enter student name: ", student.name, sizeof(student.name));
+
+    // read roll number and ensure uniqueness
+    while (1)
+    {
+        // read roll number using helper function
+        student.roll_number = read_int_range("Enter roll number: ", 0, INT_MAX);
+
+        // check for uniqueness of roll number
+        if (find_student_index(sys, student.roll_number) != -1)
+        {
+            // if roll number already exists, prompt for a unique one
+            printf("Roll number %d already exists. Please enter a unique roll number.\n",
+                   student.roll_number);
+            continue;
+        }
+        break;
+    }
+
+    // read marks and store in student struct
+    student.marks = read_float_range("Enter marks: ", 0.0f, 100.0f);
+
+    // verify if student passed or failed based on marks entered
+    verify_marks(student.marks);
+
+    // add new student to record system and print success message
+    sys->students[sys->count++] = student;
+    printf("\nStudent added successfully.\n");
+}
+
+/**
+ * modify_student - modify existing student in record system by roll number
+ *
+ * @sys: pointer to student record system variable
+ * Return: void
+ */
+void modify_student(StudentSystem *sys)
+{
+    // prompt user for roll number to modify
+    int roll;
+    roll = read_int_range("Enter roll number to modify: ", 0, INT_MAX);
+
+    // iterate through student records to find matching roll number
+    for (int i = 0; i < sys->count; i++)
+    {
+        // if roll number matches, prompt for new details
+        if (sys->students[i].roll_number == roll)
+        {
+            printf("Modifying student: %s\n", sys->students[i].name);
+
+            // read new roll number and ensure uniqueness
+            int new_roll;
+            while (1)
+            {
+                // read new roll number using helper function
+                new_roll = read_int_range("Enter new roll number (re-enter current to keep): ", 0, INT_MAX);
+
+                // verify that new roll number is unique
+                if (new_roll != sys->students[i].roll_number &&
+                    find_student_index(sys, new_roll) != -1)
+                {
+                    // if not unique, prompt for different roll number
+                    printf("Roll number %d already exists. Please choose a different roll number.\n",
+                           new_roll);
+                    continue;
+                }
+                break;
+            }
+
+            // update student record with new roll number
+            sys->students[i].roll_number = new_roll;
+
+            // read new name using helper function
+            read_name("Enter new name: ", sys->students[i].name, sizeof(sys->students[i].name));
+
+            // read new marks and verify pass/fail status
+            sys->students[i].marks = read_float_range("Enter new marks: ", 0.0f, 100.0f);
+            verify_marks(sys->students[i].marks);
+
+            // print success message and return early
+            printf("\nStudent record updated.\n");
+            return;
+        }
+    }
+
+    // if no matching roll number found, print error message
+    printf("Student with roll number %d not found.\n", roll);
+}
+
+/**
+ * remove_student - remove student from record system by roll number
+ *
+ * @sys: pointer to student record system variable
+ * Return: void
+ */
+void remove_student(StudentSystem *sys)
+{
+    int roll, index = -1;
+
+    // prompt user for roll number to remove
+    roll = read_int_range("Enter roll number to remove: ", 0, INT_MAX);
+
+    // search for student with matching roll number
+    for (int i = 0; i < sys->count; i++)
+    {
+        // if roll number matches, store index and break out of loop
+        if (sys->students[i].roll_number == roll)
+        {
+            index = i;
+            break;
+        }
+    }
+
+    // if found, reorder student records array to remove student
+    if (index != -1)
+    {
+        // iterate over records and shift elements left to fill gap
+        for (int i = index; i < sys->count - 1; i++)
+        {
+            sys->students[i] = sys->students[i + 1];
+        }
+        // decrease student count and print success message
+        sys->count--;
+        printf("\nStudent removed successfully.\n");
+    }
+    // else print not found message
+    else
+    {
+        printf("Student with roll number %d not found.\n", roll);
+    }
 }
