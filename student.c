@@ -579,3 +579,64 @@ void remove_student(StudentSystem *sys)
         printf("Student with roll number %d not found.\n", roll);
     }
 }
+
+/* ------------------ STUDENT RECORD SYSTEM ADDITIONAL FEATURES ------------------ */
+
+/**
+ * search_student - search for student by roll number and display details
+ *
+ * @sys: pointer to student record system variable
+ * Return: void
+ */
+void search_student(const StudentSystem *sys)
+{
+    // prompt user for roll number to search
+    int roll;
+    roll = read_int_range("Enter roll number to search: ", 0, INT_MAX);
+
+    // iterate through student records to find matching roll number
+    for (int i = 0; i < sys->count; i++)
+    {
+        // if roll number matches, display student details and return early
+        if (sys->students[i].roll_number == roll)
+        {
+            printf("\nStudent Found:\n");
+            printf("Name: %s\n", sys->students[i].name);
+            printf("Roll No: %d\n", sys->students[i].roll_number);
+            printf("Marks: %.2f\n", sys->students[i].marks);
+            printf("Status: %s\n", (sys->students[i].marks >= 40.0f) ? "PASS" : "FAIL");
+            return;
+        }
+    }
+
+    // if no matching roll number found, print not found message
+    printf("Student with roll number %d not found.\n", roll);
+}
+
+/**
+ * display_students - display all student records in tabular format
+ *
+ * @sys: pointer to student record system variable
+ * Return: void
+ */
+void display_students(const StudentSystem *sys)
+{
+    // if no records, print 404 message and return
+    if (sys->count == 0)
+    {
+        printf("No records found.\n");
+        return;
+    }
+
+    // print table header
+    printf("\n--- Student Records ---\n");
+    printf("%-20s %-10s %-10s\n", "Name", "Roll No", "Marks");
+
+    // iterate through student records and print each student in formatted row
+    for (int i = 0; i < sys->count; i++)
+    {
+        printf("%-20s %-10d %-10.2f\n",
+               sys->students[i].name, sys->students[i].roll_number, sys->students[i].marks);
+    }
+    printf("-----------------------\n");
+}
