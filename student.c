@@ -412,7 +412,7 @@ static void read_name(const char *prompt, char *dest, size_t size)
  * @sys: pointer to student record system
  * @roll: roll number to search for
  *
- * Return: index of matching student or -1 if not found
+ * Return: int - index of matching student or -1 if not found
  */
 static int find_student_index(const StudentSystem *sys, int roll)
 {
@@ -426,7 +426,6 @@ static int find_student_index(const StudentSystem *sys, int roll)
             return i;
         }
     }
-
     // return -1 if no matching student found
     return -1;
 }
@@ -639,4 +638,175 @@ void display_students(const StudentSystem *sys)
                sys->students[i].name, sys->students[i].roll_number, sys->students[i].marks);
     }
     printf("-----------------------\n");
+}
+
+/**
+ * compare_asc - comparison function for ascending order sort by marks
+ *
+ * @a: pointer to first student
+ * @b: pointer to second student
+ * Return: int - comparison result
+ */
+int compare_asc(const void *a, const void *b)
+{
+    // cast void pointers to Student pointers
+    Student *s1 = (Student *)a;
+    Student *s2 = (Student *)b;
+
+    // compare marks for ascending order and return result to qsort function
+    if (s1->marks > s2->marks)
+        return 1;
+    if (s1->marks < s2->marks)
+        return -1;
+
+    // return equality
+    return 0;
+}
+
+/**
+ * compare_desc - comparison function for descending order sort by marks
+ *
+ * @a: pointer to first student
+ * @b: pointer to second student
+ * Return: int - comparison result
+ */
+int compare_desc(const void *a, const void *b)
+{
+    // cast void pointers to Student pointers
+    Student *s1 = (Student *)a;
+    Student *s2 = (Student *)b;
+
+    // compare marks for descending order and return result to qsort function
+    if (s1->marks < s2->marks)
+        return 1;
+    if (s1->marks > s2->marks)
+        return -1;
+
+    // marks are equal
+    return 0;
+}
+
+/**
+ * sort_students - sort student records by marks in ascending/descending order
+ *
+ * @sys: pointer to student record system variable
+ * Return: void
+ */
+void sort_students(StudentSystem *sys)
+{
+    // prompt user for sort order choice and read into choice variable
+    int choice;
+    printf("Sort by marks:\n1. Ascending\n2. Descending\n");
+    choice = read_int_range("Enter choice: ", 1, 2);
+
+    // call qsort with appropriate comparison function based on user choice
+    if (choice == 1)
+    {
+        // sort in ascending order
+        qsort(sys->students, sys->count, sizeof(Student), compare_asc);
+        printf("Sorted in ascending order.\n");
+    }
+    else if (choice == 2)
+    {
+        // sort in descending order
+        qsort(sys->students, sys->count, sizeof(Student), compare_desc);
+        printf("Sorted in descending order.\n");
+    }
+    else
+    {
+        // invalid choice entered
+        printf("Invalid choice.\n");
+    }
+
+    // display sorted student records
+    display_students(sys);
+}
+
+/**
+ * calculate_average - calculate and display average marks of all students
+ *
+ * @sys: pointer to student record system variable
+ * Return: void
+ */
+void calculate_average(const StudentSystem *sys)
+{
+    // if no students in record system, print message and return
+    if (sys->count == 0)
+    {
+        printf("No students to calculate average.\n");
+        return;
+    }
+
+    // calculate sum of marks and compute average
+    float sum = 0;
+    for (int i = 0; i < sys->count; i++)
+    {
+        sum += sys->students[i].marks;
+    }
+
+    // print average marks to two decimal places
+    printf("\nAverage Marks: %.2f\n", sum / sys->count);
+}
+
+/**
+ * verify_marks - verify student marks and determine pass/fail status
+ *
+ * @marks: float value of student marks to verify
+ * Return: void
+ */
+void verify_marks(float marks)
+{
+    float val = marks;
+
+    // if caller passed a negative value, prompt the user for marks (called from main)
+    if (val < 0.0f)
+    {
+        char buffer[128];
+        char *endptr;
+
+        while (1)
+        {
+            printf("Enter marks (0-100): ");
+
+            // read line up to buffer size from stdin
+            if (fgets(buffer, sizeof(buffer), stdin) == NULL)
+            {
+                // EOF or read error: return to caller
+                return;
+            }
+
+            // strip newline character
+            buffer[strcspn(buffer, "\n")] = '\0';
+
+            // convert buffer string to float
+            val = strtof(buffer, &endptr);
+
+            // check for conversion errors and re-prompt if invalid
+            if (endptr == buffer)
+            {
+                printf("Invalid input. Please enter a numeric value.\n");
+                continue;
+            }
+
+            // check if marks are within valid range
+            if (val < 0.0f || val > 100.0f)
+            {
+                printf("Marks must be between 0 and 100.\n");
+                continue;
+            }
+
+            // valid marks entered; exit loop
+            break;
+        }
+    }
+
+    // determine pass/fail status based on marks and print result
+    if (val >= 40.0f)
+    {
+        printf("\nResult: PASSED\n");
+    }
+    else
+    {
+        printf("\nResult: FAILED\n");
+    }
 }

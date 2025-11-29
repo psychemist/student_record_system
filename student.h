@@ -17,6 +17,10 @@ typedef struct
     int capacity;
 } StudentSystem;
 
+// external utilities
+void greet_user();
+int get_menu_choice();
+
 // initialization and memory management
 void init_system(StudentSystem *sys);
 void free_system(StudentSystem *sys);
@@ -38,9 +42,5 @@ void verify_marks(float marks);
 // file operations
 void save_to_file(const StudentSystem *sys);
 void load_from_file(StudentSystem *sys);
-
-// utilities
-void greet_user();
-int get_menu_choice();
 
 #endif // STUDENT_H
