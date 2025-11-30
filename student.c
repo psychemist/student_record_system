@@ -810,3 +810,147 @@ void verify_marks(float marks)
         printf("\nResult: FAILED\n");
     }
 }
+
+/* ------------------ STUDENT RECORD SYSTEM FILE OPERATIONS ------------------ */
+
+/**
+ * save_to_file - save student records to a file
+ *
+ * @sys: pointer to student record system variable
+ * Return: void
+ */
+void save_to_file(const StudentSystem *sys)
+{
+    char filename[256];
+
+    // prompt until we get a non-empty filename or EOF (cancel)
+    while (1)
+    {
+        // read filename from user
+        if (!read_line("Enter filename to save to: ", filename, sizeof(filename)))
+        {
+            // EOF or error: abort save file operation
+            printf("No filename provided. Aborting save.\n");
+            return;
+        }
+
+        // check for empty filename and re-prompt
+        if (filename[0] == '\0')
+        {
+            printf("Filename cannot be empty. Press Ctrl+D to cancel or enter a filename.\n");
+            continue;
+        }
+        break;
+    }
+
+    // open file pointer for writing
+    FILE *fp = fopen(filename, "w");
+
+    // check for file open errors and abort if any
+    if (fp == NULL)
+    {
+        printf("Error opening file '%s' for writing.\n", filename);
+        return;
+    }
+
+    // write student count to file
+    fprintf(fp, "%d\n", sys->count);
+
+    // iterate through student records and write each to file
+    for (int i = 0; i < sys->count; i++)
+    {
+        fprintf(fp, "%s\n%d\n%f\n",
+                sys->students[i].name, sys->students[i].roll_number, sys->students[i].marks);
+    }
+
+    // close file pointer after writing and print success message
+    fclose(fp);
+    printf("\nRecords saved to %s.\n", filename);
+}
+
+/**
+ * load_from_file - load student records from a file
+ *
+ * @sys: pointer to student record system variable
+ * Return: void
+ */
+void load_from_file(StudentSystem *sys)
+{
+    char filename[256];
+
+    // prompt until we get a non-empty filename or EOF (cancel)
+    while (1)
+    {
+        // read filename from user
+        if (!read_line("Enter filename to load from: ", filename, sizeof(filename)))
+        {
+            // EOF or error: abort load file operation
+            printf("No filename provided. Aborting load.\n");
+            return;
+        }
+
+        // check for empty filename and re-prompt
+        if (filename[0] == '\0')
+        {
+            printf("Filename cannot be empty. Press Ctrl+D to cancel or enter a filename.\n");
+            continue;
+        }
+        break;
+    }
+
+    // open file pointer for reading
+    FILE *fp = fopen(filename, "r");
+
+    // check for file open errors and abort if any
+    if (fp == NULL)
+    {
+        printf("File '%s' not found or error opening file.\n", filename);
+        return;
+    }
+
+    // reset current student record system count
+    sys->count = 0;
+
+    // read student count from file (first word on first line is number of records)
+    int count;
+    if (fscanf(fp, "%d", &count) != 1)
+    {
+        // invalid file format or no suitable conversion; close file pointer and exit
+        fclose(fp);
+        return;
+    }
+
+    // consume newline(s) after count
+    char buffer[100];
+    fgets(buffer, sizeof(buffer), fp);
+
+    // read each student record from file and add to system
+    for (int i = 0; i < count; i++)
+    {
+        // ensure system has enough capacity for new students loaded from file
+        resize_system(sys);
+        Student student;
+
+        // read student details from file
+        if (fgets(student.name, sizeof(student.name), fp) == NULL)
+            break;
+        // remove newline character from name
+        student.name[strcspn(student.name, "\n")] = 0;
+
+        // read roll number and marks from file
+        if (fscanf(fp, "%d", &student.roll_number) != 1)
+            break;
+        if (fscanf(fp, "%f", &student.marks) != 1)
+            break;
+
+        // consume newline after marks
+        fgets(buffer, sizeof(buffer), fp);
+
+        // store loaded student to record system at count index
+        sys->students[sys->count++] = student;
+    }
+
+    // close file pointer after reading and print success message
+    fclose(fp);
+    printf("\nRecords loaded from %s.\n", filename);
+}
