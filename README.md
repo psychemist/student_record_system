@@ -59,6 +59,18 @@ Saved files are plain text:
 
 Loading expects exactly that structure. Feel free to keep multiple backups by entering different filenames (e.g., `semester_a.txt`, `semester_b.txt`).
 
+## Code Structure
+
+- **Data model**: `StudentSystem` stores a dynamically sized array of `Student` structs. Capacity doubles when needed, preventing O(n²) copying and avoiding linked-list overhead.
+- **Entry point (`main.c`)** keeps the program loop tiny on purpose. It delegates every real action to the API exposed in `student.h` header file, so the UI can change independently from the data layer.
+- **Core module (`student.c`)** groups functionality by responsibility:
+        - *Starter utilities* (`greet_user`, `get_menu_choice`) handle user experience, while *memory management* helpers (`init_system`, `resize_system`, `free_system`) encapsulate dynamic-array behavior.
+        - *Input helpers* (`trim`, `read_line`, `read_int_range`, `read_float_range`, `read_name`) form a reusable safety net. All high-level features rely on these helpers, keeping validation logic consistent everywhere.
+        - *Core features* (`add_student`, `modify_student`, `remove_student`, `search_student`, `display_students`, `search_student`) interact directly with the `StudentSystem` struct. Each function owns exactly one menu action, which makes debugging and testing straightforward.
+        - *Algorithms* (sorting callback functions, `calculate_average`, `verify_marks`) remain pure or near-pure functions, so they’re easy to reuse and reason about.
+        - *File operators* (`save_to_file` annd `load_from_file`) take filename as user input and open a file pointer to the named file in write or read mode respectively, handling I/O errors gracefully and ensuring data persistence.
+- **I/O strategy**: everything is read with `fgets` into bounded buffers, then parsed with `strtol`/`strtof`. This guarantees leftover characters don’t pollute subsequent prompts and keeps the program resilient to malformed input.
+
 ## Maintenance & Development
 
 - `make clean` removes compiled objects/binaries if you want a fresh build.
