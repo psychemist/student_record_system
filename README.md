@@ -37,6 +37,12 @@ You'll be greeted, shown the menu, and walked through each field. Choose **0** t
 | 10 | Load roster from a filename you enter |
 | 0 | Exit the program |
 
+## Sample Output Evidence
+
+Seeing the layout helps: after adding a few demo students, choosing option **5** renders the table below in your terminal.
+
+![Student records table shown in the terminal](student_records_display_table.png)
+
 ## Validation Rules
 
 - **Names**: must contain at least one alphabetic character. Only letters (`A-Z`, `a-z`), spaces, and dashes are accepted.
