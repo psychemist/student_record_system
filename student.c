@@ -41,7 +41,7 @@ void greet_user()
 int get_menu_choice()
 {
     int choice;
-    char buf[64];
+    char buf[8];
     char *endptr;
 
     // loop until we get a valid integer choice in range [0..10]
@@ -174,26 +174,31 @@ void resize_system(StudentSystem *sys)
  */
 static void trim(char *s)
 {
+    char *start = s;
     char *end;
 
-    // trim leading spaces by advancing pointer to first non-space character
-    while (isspace((unsigned char)*s))
-        s++;
+    // find first non-whitespace character
+    while (*start && isspace((unsigned char)*start))
+        start++;
 
-    // if string consists of all spaces, return only null terminator
-    if (*s == 0)
+    // if the string is all whitespaces, clear it
+    if (*start == '\0')
     {
         *s = '\0';
         return;
     }
 
-    // trim trailing spaces by moving pointer backward to last non-space character
-    end = s + strlen(s) - 1;
-
-    while (end > s && isspace((unsigned char)*end))
+    // find last non-whitespace character
+    end = start + strlen(start) - 1;
+    while (end > start && isspace((unsigned char)*end))
         end--;
 
+    // terminate sring after the last non-space character
     *(end + 1) = '\0';
+
+    // shift trimmed substring to the beginning if needed
+    if (start != s)
+        memmove(s, start, (size_t)(end - start + 2));
 }
 
 /**
@@ -235,7 +240,7 @@ static int read_line(const char *prompt, char *buf, size_t size)
  */
 static int read_int_range(const char *prompt, int min, int max)
 {
-    char buf[128];
+    char buf[64];
     char *endptr;
     long val;
 
@@ -265,7 +270,7 @@ static int read_int_range(const char *prompt, int min, int max)
         }
 
         // check for out-of-range errors and re-enter loop if invalid
-        if (errno == ERANGE || val < INT_MIN || val > INT_MAX)
+        if (errno == ERANGE)
         {
             printf("Integer out of range.\n");
             continue;
@@ -294,7 +299,7 @@ static int read_int_range(const char *prompt, int min, int max)
  */
 static float read_float_range(const char *prompt, float min, float max)
 {
-    char buf[128];
+    char buf[64];
     char *endptr;
     float val;
 
@@ -443,7 +448,7 @@ void add_student(StudentSystem *sys)
     // increase system capacity if student records array is full
     resize_system(sys);
 
-    // declare new student array
+    // declare new student
     Student student;
 
     // read name into student struct using helper function
@@ -569,7 +574,6 @@ void remove_student(StudentSystem *sys)
             sys->students[i] = sys->students[i + 1];
         }
         // decrease student count and print success message
-        sys->count--;
         printf("\nStudent removed successfully.\n");
     }
     // else print not found message
@@ -628,16 +632,18 @@ void display_students(const StudentSystem *sys)
     }
 
     // print table header
-    printf("\n--- Student Records ---\n");
-    printf("%-20s %-10s %-10s\n", "Name", "Roll No", "Marks");
+    printf("\n====================== STUDENT RECORDS =======================\n");
+    printf("| %-5s | %-20s | %-7s | %-8s | %-5s |\n", "Count", "Name", "Roll No", "Marks", "Status");
+    printf("|------------------------------------------------------------|\n");
 
     // iterate through student records and print each student in formatted row
     for (int i = 0; i < sys->count; i++)
     {
-        printf("%-20s %-10d %-10.2f\n",
-               sys->students[i].name, sys->students[i].roll_number, sys->students[i].marks);
+        printf("| %-5d | %-20s | %-7d | %-8.2f | %-5s  |\n", i + 1,
+               sys->students[i].name, sys->students[i].roll_number, sys->students[i].marks,
+               (sys->students[i].marks >= 40.0f) ? "PASS" : "FAIL");
     }
-    printf("-----------------------\n");
+    printf("|____________________________________________________________|\n");
 }
 
 /**
@@ -758,46 +764,10 @@ void verify_marks(float marks)
 {
     float val = marks;
 
-    // if caller passed a negative value, prompt the user for marks (called from main)
+    // if caller passed a negative value (called from main), prompt the user for marks
     if (val < 0.0f)
     {
-        char buffer[128];
-        char *endptr;
-
-        while (1)
-        {
-            printf("Enter marks (0-100): ");
-
-            // read line up to buffer size from stdin
-            if (fgets(buffer, sizeof(buffer), stdin) == NULL)
-            {
-                // EOF or read error: return to caller
-                return;
-            }
-
-            // strip newline character
-            buffer[strcspn(buffer, "\n")] = '\0';
-
-            // convert buffer string to float
-            val = strtof(buffer, &endptr);
-
-            // check for conversion errors and re-prompt if invalid
-            if (endptr == buffer)
-            {
-                printf("Invalid input. Please enter a numeric value.\n");
-                continue;
-            }
-
-            // check if marks are within valid range
-            if (val < 0.0f || val > 100.0f)
-            {
-                printf("Marks must be between 0 and 100.\n");
-                continue;
-            }
-
-            // valid marks entered; exit loop
-            break;
-        }
+        val = read_float_range("Enter marks (0-100): ", 0.0f, 100.0f);
     }
 
     // determine pass/fail status based on marks and print result
@@ -821,7 +791,7 @@ void verify_marks(float marks)
  */
 void save_to_file(const StudentSystem *sys)
 {
-    char filename[256];
+    char filename[64];
 
     // prompt until we get a non-empty filename or EOF (cancel)
     while (1)
@@ -876,7 +846,7 @@ void save_to_file(const StudentSystem *sys)
  */
 void load_from_file(StudentSystem *sys)
 {
-    char filename[256];
+    char filename[64];
 
     // prompt until we get a non-empty filename or EOF (cancel)
     while (1)
@@ -921,7 +891,7 @@ void load_from_file(StudentSystem *sys)
     }
 
     // consume newline(s) after count
-    char buffer[100];
+    char buffer[8];
     fgets(buffer, sizeof(buffer), fp);
 
     // read each student record from file and add to system
