@@ -49,17 +49,17 @@ int get_menu_choice()
     {
         // print menu to display
         printf("\n===== STUDENT RECORD SYSTEM MENU =====\n");
-        printf("1. Add Student\n");
-        printf("2. Modify Student\n");
-        printf("3. Remove Student\n");
-        printf("4. Search Student\n");
-        printf("5. Display All Students\n");
-        printf("6. Sort Students\n");
-        printf("7. Calculate Average Marks\n");
-        printf("8. Verify Student Marks\n");
-        printf("9. Save to File\n");
+        printf("1.  Add Student\n");
+        printf("2.  Modify Student\n");
+        printf("3.  Remove Student\n");
+        printf("4.  Search Student\n");
+        printf("5.  Display All Students\n");
+        printf("6.  Sort Students\n");
+        printf("7.  Calculate Average Marks\n");
+        printf("8.  Verify Student Marks\n");
+        printf("9.  Save to File\n");
         printf("10. Load from File\n");
-        printf("0. Exit\n");
+        printf("0.  Exit\n");
         printf("\nEnter your choice: ");
 
         // read user input from stdin and save to buffer
