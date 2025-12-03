@@ -48,7 +48,7 @@ int get_menu_choice()
     while (1)
     {
         // print menu to display
-        printf("\n===== STUDENT RECORD MENU =====\n");
+        printf("\n===== STUDENT RECORD SYSTEM MENU =====\n");
         printf("1. Add Student\n");
         printf("2. Modify Student\n");
         printf("3. Remove Student\n");
