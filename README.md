@@ -37,7 +37,7 @@ You'll be greeted, shown the menu, and walked through each field. Choose **0** t
 | 10 | Load roster from a filename you enter |
 | 0 | Exit the program |
 
-## Sample Output Evidence
+## Output Sample Evidence
 
 Seeing the layout helps: after adding a few demo students, choosing option **5** renders the table below in your terminal.
 
