@@ -574,6 +574,7 @@ void remove_student(StudentSystem *sys)
             sys->students[i] = sys->students[i + 1];
         }
         // decrease student count and print success message
+        sys->count--;
         printf("\nStudent removed successfully.\n");
     }
     // else print not found message
