@@ -1,6 +1,6 @@
 # Student Record System
 
-An interactive C (C11) console application for MIVA Openn University's COS 201 lab work. The menu-driven workflow keeps every input line under tight validation so users can safely manage student records, snapshot them to disk, and restore them later without corrupting data.
+An interactive C (C11) console application for MIVA Open University's COS 201 lab work. The menu-driven workflow keeps every input line under tight validation so users can safely manage student records, snapshot them to disk, and restore them later without corrupting data.
 
 ## Feature Overview
 
